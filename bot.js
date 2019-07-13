@@ -10,16 +10,23 @@ var failure_count = 0;
 var total_count = 0;
 var questions = [];
 var posted_questions = [];
+var interval = null;
 
 tweetIt();      // TAKES CARE OF CODE EXECUTION:
 
 // A function to take care of tweeting
 function tweetIt() {
-    fetchPostedTweets();                                // LOAD already posted tweets
-    setTimeout(processQuestions, 1300);                 // Check for tweet length and if duplicate
-    setTimeout(showInfo, 1500);                         // Show info to the user about possible remaining posts
-    // setTimeout(postRandomQuestion, 2000);               // "Instantly" post the first tweet at start
-    setInterval(postRandomQuestion, 1000*3600);         // Post a tweet every hour (1000*3600)
+    // Reset everything first:
+    questions = [];
+    posted_questions = [];
+    interval = null;
+    failure_count = 0;
+    total_count = 0;
+    fetchPostedTweets();                                    // LOAD already posted tweets
+    setTimeout(processQuestions, 1300);                     // Check for tweet length and if duplicate
+    setTimeout(showInfo, 1500);                             // Show info to the user about possible remaining posts
+    setTimeout(postRandomQuestion, 2000);                   // "Instantly" post the first tweet at start
+    interval = setInterval(postRandomQuestion, 1000*3600);  // Post a tweet every hour (1000*3600)         
 }
 
 // Reads already posted tweets and saves them into an array (posted_questions):
@@ -72,7 +79,7 @@ function postRandomQuestion() {
 
     // This is the message / tweet:
     var tweet = {
-        status: "#philosophy " + questions[randomNum]
+        status: questions[randomNum]
     }
 
     // POST the tweet:
@@ -83,6 +90,8 @@ function postRandomQuestion() {
         if (err) {
             console.log("[ ERROR ] Something went wrong!!\n\n");
             console.log(err);
+            clearInterval(interval);
+            tweetIt();
         } else {
             console.log("\n[ SUCCESS ] It worked!!");
             console.log("[ POSTED ] " + tweet.status);
